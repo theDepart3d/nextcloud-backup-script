@@ -3,7 +3,7 @@
 # clear terminal
 clear
 # Show Welcome
-VERSION='1.1.1'
+VERSION='1.1.3'
 echo "============================================="
 echo "|              Nextcloud Backup             |"
 echo "|                   Script                  |"
@@ -18,7 +18,8 @@ ORANGE='\033[1;33m'
 NC='\033[0m' # No Color
 
 NC_DIRECTORY=$1
-NC_BACKUP_FOLDER="~/nextcloud_backups/"
+NC_BACKUP_FOLDER=$2
+PKG_REQUIREMENTS=("mysqldump" "zip" "rsync" "pv" "gzip")
 
 # Abilit to add color to certain outputs
 echoc () {
@@ -47,26 +48,35 @@ if (( $EUID != 0 )); then
     exit
 fi
 
-# Check if pv is installed for zip progress report
-if ! command -v pv &> /dev/null; then
-    echoc ${GREEN}'Status'${NC}': Installing pv'
-    apt-get install pv -y &> /dev/null
+# Check if required pkgs are installed for script
+echoc ${ORANGE}'Status'${NC}": Checking if required packages are installed"
+for required_pkg in "${PKG_REQUIREMENTS[@]}"
+do
+    if ! command -v $required_pkg &> /dev/null; then
+        echoc ${GREEN}'Status'${NC}": Installing $required_pkg"
+        apt-get install $required_pkg -y &> /dev/null
+    fi
+done
+echoc ${GREEN}'Status'${NC}": Required packages installed"
+
+# Check if Backup Directory set
+if test -z "$NC_BACKUP_FOLDER"; then
+    read -p 'Backup Folder Location: ' NC_BACKUP_FOLDER;
 fi
 
-# jump into root directory /root/
-cd ~/
-echo -e ${GREEN}'Status'${NC}': Entered ~/'
+echo -e ${GREEN}'Status'${NC}": Entered $NC_BACKUP_FOLDER"
 
-if [ -d ~/nextcloud_backups/$(date +'%Y-%m-%d')/ ]; then
-    cd ~/nextcloud_backups/$(date +'%Y-%m-%d')/
-    echoc ${GREEN}'Status'${NC}': Entered ~/nextcloud_backups/'$(date +'%Y-%m-%d')
+if [ -d $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/ ]; then
+    cd $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/
+    echo -e ${GREEN}'Status'${NC}": Entered $NC_BACKUP_FOLDER/"$(date +'%Y-%m-%d')
 else
-    mkdir -p ~/nextcloud_backups/$(date +'%Y-%m-%d')/$(date +'%HT%M')
-    cd ~/nextcloud_backups/$(date +'%Y-%m-%d')/$(date +'%HT%M')
+    mkdir -p $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')
+    cd $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')
 fi
+
 create_folder () {
-    cd ~/nextcloud_backups/$(date +'%Y-%m-%d')/$(date +'%HT%M')
-    echoc ${GREEN}'Status'${NC}': Entered ~/nextcloud_backups/'$(date +'%F')/$(date +'%HT%M')
+    cd $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')
+    echoc ${GREEN}'Status'${NC}": Entered $NC_BACKUP_FOLDER/"$(date +'%F')/$(date +'%HT%M')
     echoc ${ORANGE}'Status'${NC}
     if test -z "$NC_DIRECTORY"; then
         read -p 'Enter valid nextcloud directory: ' NC_DIRECTORY;
@@ -108,7 +118,7 @@ create_folder () {
             echo "============================================="
             echo ""
             rm database_backup.log
-            # Enable Maintenance Mode 
+            # Disable Maintenance Mode 
             sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --off
         else
             echo ""
@@ -141,7 +151,7 @@ create_folder () {
             echo ""
             echoc -e ${GREEN} "Backup Folder"${NC}": $NC_WORKING_FOLDER"
             rm database_backup.log
-            # Enable Maintenance Mode 
+            # Disable Maintenance Mode 
             sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --off
         else
             echo ""
@@ -156,13 +166,12 @@ create_folder () {
     fi
 }
 
-if [ -d ~/nextcloud_backups/$(date +'%F')/$(date +'%HT%M')/ ]; then
-    NC_WORKING_FOLDER="~/nextcloud_backups/$(date +'%Y-%m-%d')/$(date +'%HT%M')"
-    cd ~/nextcloud_backups/$(date +'%F')/$(date +'%HT%M')/
+if [ -d $NC_BACKUP_FOLDER/$(date +'%F')/$(date +'%HT%M')/ ]; then
+    NC_WORKING_FOLDER="$NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')"
     create_folder
 else
-    NC_WORKING_FOLDER="~/nextcloud_backups/$(date +'%Y-%m-%d')/$(date +'%HT%M')"
-    echoc ${GREEN}'Status'${NC}": Creating New folder: ~/nextcloud_backups/$(date +'%F')/$(date +'%HT%M')"
-    mkdir -p $(date +'%HT%M')
+    NC_WORKING_FOLDER="$NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')"
+    echoc ${GREEN}'Status'${NC}": Creating New folder: $NC_BACKUP_FOLDER/$(date +'%F')/$(date +'%HT%M')"
+    mkdir $(date +'%HT%M')
     create_folder
 fi
