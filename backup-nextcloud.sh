@@ -1,5 +1,5 @@
 #!/bin/bash
-# Made By The Departed
+# Made By The Depart3d
 # clear terminal
 clear
 # Show Welcome
