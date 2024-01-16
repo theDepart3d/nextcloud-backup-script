@@ -3,7 +3,7 @@
 # clear terminal
 clear
 # Show Welcome
-VERSION='1.1.3'
+VERSION='1.1.5'
 echo "============================================="
 echo "|              Nextcloud Backup             |"
 echo "|                   Script                  |"
@@ -48,6 +48,21 @@ if (( $EUID != 0 )); then
     exit
 fi
 
+# Check what webserver is running Apache2/Nginx
+# get the user thats running the webserver
+if cat /etc/apache2/apache2.conf &> /dev/null; then
+    WEB_SERVER_USER=$(ps aux | grep -v root | grep -i apache | cut -d\  -f1 | sort | uniq)
+elif cat /etc/nginx/nginx.conf &> /dev/null; then
+    WEB_SERVER_USER=$(ps aux | grep -v root | grep -i nginx | cut -d\  -f1 | sort | uniq)
+fi
+
+# Check where php is installed if not in the default location
+if command -v /usr/bin/php &> /dev/null; then
+    PHP_LOCATION="/usr/bin/php"
+else
+    PHP_LOCATION=$(which php)
+fi
+
 # Check if required pkgs are installed for script
 echoc ${ORANGE}'Status'${NC}": Checking if required packages are installed"
 for required_pkg in "${PKG_REQUIREMENTS[@]}"
@@ -82,11 +97,18 @@ create_folder () {
         read -p 'Enter valid nextcloud directory: ' NC_DIRECTORY;
     fi
     if [ -d $NC_DIRECTORY ]; then
-        # Enable Maintenance Mode 
-        sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --on
+        # Enable Maintenance Mode
+        cd $NC_DIRECTORY
+        CHECK_IF_NC_FOLDER=$(php -r 'error_reporting(0);require("version.php"); echo $OC_VersionString;')
+        if test -z "$CHECK_IF_NC_FOLDER"; then
+            echoc ${RED}"Unable to detect valid nextcloud install"${NC}
+            exit
+        fi
+        cd $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')
+        sudo -u $WEB_SERVER_USER $PHP_LOCATION $NC_DIRECTORY/occ maintenance:mode --on
         echoc ${GREEN}'Status'${NC}': '$NC_DIRECTORY' valid directory'
         echoc ${GREEN}'Status'${NC}': Creating zip'
-        zip -r wwwDirBackup-$(date +'%Y-%m-%d').zip $NC_DIRECTORY 2>&1 | pv -lep -s $(ls -Rl1 $NC_DIRECTORY | egrep -c '^[-/]') > /dev/null
+        zip -X- -r wwwDirBackup-$(date +'%Y-%m-%d').zip $NC_DIRECTORY 2>&1 | pv -lep -s $(ls -Rl1 $NC_DIRECTORY | egrep -c '^[-/]') > /dev/null
         echoc ${GREEN}'Status'${NC}': Zip file created' 
         echo ""
         echo "============================================="
@@ -119,7 +141,7 @@ create_folder () {
             echo ""
             rm -rf database_backup.log
             # Disable Maintenance Mode 
-            sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --off
+            sudo -u $WEB_SERVER_USER $PHP_LOCATION $NC_DIRECTORY/occ maintenance:mode --off
         else
             echo ""
             echo "============================================="
@@ -129,6 +151,8 @@ create_folder () {
             echo "============================================="
             echo ""
             echo -e "mysqldump encountered a problem look in ${RED}$NC_WORKING_FOLDER/database_backup.log${NC} for more information."
+            # Disable Maintenance Mode 
+            sudo -u $WEB_SERVER_USER $PHP_LOCATION $NC_DIRECTORY/occ maintenance:mode --off
         fi
     else
         DBNAME=$(grep -Po "(?<='dbname' => ').*(?=',)" $NC_CONFIG_FILE) 
@@ -152,7 +176,7 @@ create_folder () {
             echoc -e ${GREEN} "Backup Folder"${NC}": $NC_WORKING_FOLDER"
             rm -rf database_backup.log
             # Disable Maintenance Mode 
-            sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --off
+            sudo -u $WEB_SERVER_USER $PHP_LOCATION $NC_DIRECTORY/occ maintenance:mode --off
         else
             echo ""
             echo "============================================="
@@ -162,6 +186,8 @@ create_folder () {
             echo "============================================="
             echo ""
             echo -e "mysqldump encountered a problem look in ${RED}$NC_WORKING_FOLDER/database_backup.log${NC} for more information."
+            # Disable Maintenance Mode 
+            sudo -u $WEB_SERVER_USER $PHP_LOCATION $NC_DIRECTORY/occ maintenance:mode --off
         fi
     fi
 }
