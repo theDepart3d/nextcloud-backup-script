@@ -3,7 +3,7 @@
 # clear terminal
 clear
 # Show Welcome
-VERSION='1.1.0'
+VERSION='1.1.1'
 echo "============================================="
 echo "|              Nextcloud Backup             |"
 echo "|                   Script                  |"
@@ -76,6 +76,8 @@ create_folder () {
         read -p 'Enter valid nextcloud directory: ' NC_DIRECTORY;
     fi
     if [ -d $NC_DIRECTORY ]; then
+        # Enable Maintenance Mode 
+        sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --on
         echoc ${GREEN}'Status'${NC}': '$NC_DIRECTORY' valid directory'
         echoc ${GREEN}'Status'${NC}': Creating zip'
         zip -r wwwDirBackup-$(date +'%Y-%m-%d').zip $NC_DIRECTORY 2>&1 | pv -lep -s $(ls -Rl1 $NC_DIRECTORY | egrep -c '^[-/]') > /dev/null
@@ -110,6 +112,8 @@ create_folder () {
             echo "============================================="
             echo ""
             rm database_backup.log
+            # Enable Maintenance Mode 
+            sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --off
         else
             echo ""
             echo "============================================="
@@ -141,6 +145,8 @@ create_folder () {
             echo ""
             echoc -e ${GREEN} "Backup Folder"${NC}": $NC_WORKING_FOLDER"
             rm database_backup.log
+            # Enable Maintenance Mode 
+            sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --off
         else
             echo ""
             echo "============================================="
