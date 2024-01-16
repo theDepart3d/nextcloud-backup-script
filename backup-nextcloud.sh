@@ -18,7 +18,8 @@ ORANGE='\033[1;33m'
 NC='\033[0m' # No Color
 
 NC_DIRECTORY=$1
-NC_BACKUP_FOLDER=$2 
+NC_BACKUP_FOLDER=$2
+PKG_REQUIREMENTS=("mysqldump" "zip" "rsync" "pv" "gzip")
 
 # Abilit to add color to certain outputs
 echoc () {
@@ -47,7 +48,15 @@ if (( $EUID != 0 )); then
     exit
 fi
 
-# Check if pv is installed for zip progress report
+# Check if required pkgs are installed for script
+for required_pkg in "${PKG_REQUIREMENTS[@]}"
+do
+    if ! command -v $required_pkg &> /dev/null; then
+        echoc ${GREEN}'Status'${NC}": Installing $required_pkg"
+        apt-get install $required_pkg -y &> /dev/null
+    fi
+done
+
 if ! command -v pv &> /dev/null; then
     echoc ${GREEN}'Status'${NC}': Installing pv'
     apt-get install pv -y &> /dev/null
@@ -57,6 +66,7 @@ fi
 if test -z "$NC_BACKUP_FOLDER"; then
     read -p 'Backup Folder Location: ' NC_BACKUP_FOLDER;
 fi
+
 echo -e ${GREEN}'Status'${NC}": Entered $NC_BACKUP_FOLDER"
 
 if [ -d $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/ ]; then
@@ -66,6 +76,7 @@ else
     mkdir -p $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')
     cd $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')
 fi
+
 create_folder () {
     cd $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')
     echoc ${GREEN}'Status'${NC}": Entered $NC_BACKUP_FOLDER/"$(date +'%F')/$(date +'%HT%M')
@@ -110,7 +121,7 @@ create_folder () {
             echo "============================================="
             echo ""
             rm database_backup.log
-            # Enable Maintenance Mode 
+            # Disable Maintenance Mode 
             sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --off
         else
             echo ""
@@ -143,7 +154,7 @@ create_folder () {
             echo ""
             echoc -e ${GREEN} "Backup Folder"${NC}": $NC_WORKING_FOLDER"
             rm database_backup.log
-            # Enable Maintenance Mode 
+            # Disable Maintenance Mode 
             sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --off
         else
             echo ""

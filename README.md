@@ -11,7 +11,7 @@ Backups are all stored by day and time, incase multiple backups are created in a
 - PV installed (if not found script will install it)
 - mysqldump
 - zip
-- OS: Linux based
+- OS: Ubuntu/Debian
 
 ## Installation
 
