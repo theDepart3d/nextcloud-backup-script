@@ -11,6 +11,7 @@ Backups are all stored by day and time, incase multiple backups are created in a
 All requirements will be installed automatically if not found
 - PV
 - mysqldump
+- rsync
 - zip
 - OS: Ubuntu/Debian
 

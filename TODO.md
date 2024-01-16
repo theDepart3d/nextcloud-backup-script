@@ -1,4 +1,4 @@
 # TODO List
 
-- Dynamic Output Dir (available to backup to external sources)
 - rsync for remote export backup
+- check if script can be used for docker AIO
