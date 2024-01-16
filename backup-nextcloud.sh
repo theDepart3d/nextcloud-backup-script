@@ -49,6 +49,7 @@ if (( $EUID != 0 )); then
 fi
 
 # Check if required pkgs are installed for script
+echoc ${ORANGE}'Status'${NC}": Checking if required packages are installed"
 for required_pkg in "${PKG_REQUIREMENTS[@]}"
 do
     if ! command -v $required_pkg &> /dev/null; then
@@ -56,11 +57,7 @@ do
         apt-get install $required_pkg -y &> /dev/null
     fi
 done
-
-if ! command -v pv &> /dev/null; then
-    echoc ${GREEN}'Status'${NC}': Installing pv'
-    apt-get install pv -y &> /dev/null
-fi
+echoc ${GREEN}'Status'${NC}": Required packages installed"
 
 # Check if Backup Directory set
 if test -z "$NC_BACKUP_FOLDER"; then
