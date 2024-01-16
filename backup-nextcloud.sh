@@ -18,7 +18,7 @@ ORANGE='\033[1;33m'
 NC='\033[0m' # No Color
 
 NC_DIRECTORY=$1
-NC_BACKUP_FOLDER="~/nextcloud_backups/"
+NC_BACKUP_FOLDER=$2 
 
 # Abilit to add color to certain outputs
 echoc () {
@@ -53,20 +53,27 @@ if ! command -v pv &> /dev/null; then
     apt-get install pv -y &> /dev/null
 fi
 
+# Check if Backup Directory set
+if test -z "$NC_BACKUP_FOLDER"; then
+    read -p 'Backup Folder Location: ' NC_BACKUP_DIRECTORY;
+    mkdir -p $NC_BACKUP_DIRECTORY;
+    echo $NC_BACKUP_DIRECTORY;
+fi
+
 # jump into root directory /root/
 cd ~/
 echo -e ${GREEN}'Status'${NC}': Entered ~/'
 
-if [ -d ~/nextcloud_backups/$(date +'%Y-%m-%d')/ ]; then
-    cd ~/nextcloud_backups/$(date +'%Y-%m-%d')/
-    echoc ${GREEN}'Status'${NC}': Entered ~/nextcloud_backups/'$(date +'%Y-%m-%d')
+if [ -d $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/ ]; then
+    cd $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/
+    echo -e ${GREEN}'Status'${NC}": Entered $NC_BACKUP_FOLDER/"$(date +'%Y-%m-%d')
 else
-    mkdir -p ~/nextcloud_backups/$(date +'%Y-%m-%d')/$(date +'%HT%M')
-    cd ~/nextcloud_backups/$(date +'%Y-%m-%d')/$(date +'%HT%M')
+    mkdir -p $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')
+    cd $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')
 fi
 create_folder () {
-    cd ~/nextcloud_backups/$(date +'%Y-%m-%d')/$(date +'%HT%M')
-    echoc ${GREEN}'Status'${NC}': Entered ~/nextcloud_backups/'$(date +'%F')/$(date +'%HT%M')
+    cd $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')
+    echoc ${GREEN}'Status'${NC}": Entered $NC_BACKUP_FOLDER/"$(date +'%F')/$(date +'%HT%M')
     echoc ${ORANGE}'Status'${NC}
     if test -z "$NC_DIRECTORY"; then
         read -p 'Enter valid nextcloud directory: ' NC_DIRECTORY;
@@ -156,13 +163,13 @@ create_folder () {
     fi
 }
 
-if [ -d ~/nextcloud_backups/$(date +'%F')/$(date +'%HT%M')/ ]; then
-    NC_WORKING_FOLDER="~/nextcloud_backups/$(date +'%Y-%m-%d')/$(date +'%HT%M')"
-    cd ~/nextcloud_backups/$(date +'%F')/$(date +'%HT%M')/
+if [ -d $NC_BACKUP_FOLDER/$(date +'%F')/$(date +'%HT%M')/ ]; then
+    NC_WORKING_FOLDER="$NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')"
+    cd $NC_BACKUP_FOLDER/$(date +'%F')/$(date +'%HT%M')/
     create_folder
 else
-    NC_WORKING_FOLDER="~/nextcloud_backups/$(date +'%Y-%m-%d')/$(date +'%HT%M')"
-    echoc ${GREEN}'Status'${NC}": Creating New folder: ~/nextcloud_backups/$(date +'%F')/$(date +'%HT%M')"
+    NC_WORKING_FOLDER="$NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')"
+    echoc ${GREEN}'Status'${NC}": Creating New folder: $NC_BACKUP_FOLDER/$(date +'%F')/$(date +'%HT%M')"
     mkdir -p $(date +'%HT%M')
     create_folder
 fi
