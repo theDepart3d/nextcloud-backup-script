@@ -3,7 +3,7 @@
 # clear terminal
 clear
 # Show Welcome
-VERSION='1.1.2'
+VERSION='1.1.3'
 echo "============================================="
 echo "|              Nextcloud Backup             |"
 echo "|                   Script                  |"
