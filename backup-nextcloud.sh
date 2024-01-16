@@ -117,7 +117,7 @@ create_folder () {
             echo -e ${NC}
             echo "============================================="
             echo ""
-            rm database_backup.log
+            rm -r database_backup.log
             # Disable Maintenance Mode 
             sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --off
         else
@@ -150,7 +150,7 @@ create_folder () {
             echo "============================================="
             echo ""
             echoc -e ${GREEN} "Backup Folder"${NC}": $NC_WORKING_FOLDER"
-            rm database_backup.log
+            rm -r database_backup.log
             # Disable Maintenance Mode 
             sudo -u www-data php $NC_DIRECTORY/occ maintenance:mode --off
         else
