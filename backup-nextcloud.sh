@@ -3,7 +3,7 @@
 # clear terminal
 clear
 # Show Welcome
-VERSION='1.1.1'
+VERSION='1.1.2'
 echo "============================================="
 echo "|              Nextcloud Backup             |"
 echo "|                   Script                  |"
@@ -56,11 +56,7 @@ fi
 # Check if Backup Directory set
 if test -z "$NC_BACKUP_FOLDER"; then
     read -p 'Backup Folder Location: ' NC_BACKUP_FOLDER;
-    mkdir -p $NC_BACKUP_FOLDER;
 fi
-
-# jump into root directory /root/
-cd $NC_BACKUP_FOLDER
 echo -e ${GREEN}'Status'${NC}": Entered $NC_BACKUP_FOLDER"
 
 if [ -d $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/ ]; then
@@ -164,11 +160,10 @@ create_folder () {
 
 if [ -d $NC_BACKUP_FOLDER/$(date +'%F')/$(date +'%HT%M')/ ]; then
     NC_WORKING_FOLDER="$NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')"
-    cd $NC_BACKUP_FOLDER/$(date +'%F')/$(date +'%HT%M')/
     create_folder
 else
     NC_WORKING_FOLDER="$NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/$(date +'%HT%M')"
     echoc ${GREEN}'Status'${NC}": Creating New folder: $NC_BACKUP_FOLDER/$(date +'%F')/$(date +'%HT%M')"
-    mkdir -p $(date +'%HT%M')
+    mkdir $(date +'%HT%M')
     create_folder
 fi
