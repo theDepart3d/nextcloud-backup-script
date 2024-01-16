@@ -39,10 +39,6 @@ case "$OSTYPE" in
         echo -e "${RED}Windows is not supported by default${NC}"
         exit
     ;;
-    *)
-        echo -e "${RED}Unsupported OS: $OSTYPE${NC}";
-        exit
-    ;;
 esac
 
 # Must be root to run this script
