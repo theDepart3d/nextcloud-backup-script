@@ -55,14 +55,13 @@ fi
 
 # Check if Backup Directory set
 if test -z "$NC_BACKUP_FOLDER"; then
-    read -p 'Backup Folder Location: ' NC_BACKUP_DIRECTORY;
-    mkdir -p $NC_BACKUP_DIRECTORY;
-    echo $NC_BACKUP_DIRECTORY;
+    read -p 'Backup Folder Location: ' NC_BACKUP_FOLDER;
+    mkdir -p $NC_BACKUP_FOLDER;
 fi
 
 # jump into root directory /root/
-cd ~/
-echo -e ${GREEN}'Status'${NC}': Entered ~/'
+cd $NC_BACKUP_FOLDER
+echo -e ${GREEN}'Status'${NC}": Entered $NC_BACKUP_FOLDER"
 
 if [ -d $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/ ]; then
     cd $NC_BACKUP_FOLDER/$(date +'%Y-%m-%d')/
