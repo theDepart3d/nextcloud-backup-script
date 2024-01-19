@@ -99,7 +99,7 @@ create_folder () {
     if [ -d $NC_DIRECTORY ]; then
         # Enable Maintenance Mode
         cd $NC_DIRECTORY
-        CHECK_IF_NC_FOLDER=$(php -r 'error_reporting(0);require("version.php"); echo $OC_VersionString;')
+        CHECK_IF_NC_FOLDER=$($PHP_LOCATION -r 'error_reporting(0);require("version.php"); echo $OC_VersionString;')
         if test -z "$CHECK_IF_NC_FOLDER"; then
             echoc ${RED}"Unable to detect valid nextcloud install"${NC}
             exit

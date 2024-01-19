@@ -4,8 +4,8 @@ Simple Way to create backups for Nextcloud. Ability to backup both the nextcloud
 Tired of manually creating backups. This is a simple answer, the script can be runned manually or automatically.
 
 Backups are all stored by day and time, incase multiple backups are created in a day.
-- ~/nextcloud_backups/YYYY-M-D/HTM
-- ~/nextcloud_backups/2024-01-01/12T47
+- /path/to/nextcloud_backups/YYYY-M-D/HTM
+- /path/to/nextcloud_backups/2024-01-01/12T47
 
 ## Requirements
 All requirements will be installed automatically if not found
@@ -17,8 +17,7 @@ All requirements will be installed automatically if not found
 
 ## Installation
 
-First you will need root access to the server. EUID 0 (/root/)
-Clone the script into your /root/ directory (~/ == /root/)
+Clone the script into your /root/ directory.
 
 ```bash
   git clone https://github.com/theDepart3d/nextcloud-backup-script.git
@@ -30,7 +29,7 @@ Clone the script into your /root/ directory (~/ == /root/)
 
 ```bash
 # to run the script manually all you need to do is.
-./backup-nextcloud.sh
+. ./backup-nextcloud.sh
 # or 
 bash backup-nextcloud.sh
 ```
